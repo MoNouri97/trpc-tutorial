@@ -1,28 +1,26 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
-import { withTRPC } from '@trpc/next'
-import { loggerLink } from '@trpc/client/links/loggerLink'
-import { httpBatchLink } from '@trpc/client/links/httpBatchLink'
-import superjson from 'superjson'
-import { AppRouter } from '../server/route/app.router'
-import { url } from '../constants'
-import { trpc } from '../utils/trpc'
-import { UserContextProvider } from '../context/user.context'
+import { httpBatchLink } from '@trpc/client/links/httpBatchLink';
+import { loggerLink } from '@trpc/client/links/loggerLink';
+import { withTRPC } from '@trpc/next';
+import type { AppProps } from 'next/app';
+import superjson from 'superjson';
+import { url } from '../constants';
+import { UserContextProvider } from '../context/user.context';
+import { AppRouter } from '../server/route/app.router';
+import '../styles/globals.css';
+import { trpc } from '../utils/trpc';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const { data, error, isLoading } = trpc.useQuery(['users.me'])
-
+  const { data, isLoading } = trpc.useQuery(['users.me']);
   if (isLoading) {
-    return <>Loading user...</>
+    return <p>Loading...</p>;
   }
-
   return (
     <UserContextProvider value={data}>
       <main>
         <Component {...pageProps} />
       </main>
     </UserContextProvider>
-  )
+  );
 }
 
 export default withTRPC<AppRouter>({
@@ -33,7 +31,7 @@ export default withTRPC<AppRouter>({
         maxBatchSize: 10,
         url,
       }),
-    ]
+    ];
 
     return {
       queryClientConfig: {
@@ -48,13 +46,13 @@ export default withTRPC<AppRouter>({
           return {
             ...ctx.req.headers,
             'x-ssr': '1',
-          }
+          };
         }
-        return {}
+        return {};
       },
       links,
       transformer: superjson,
-    }
+    };
   },
   ssr: false,
-})(MyApp)
+})(MyApp);

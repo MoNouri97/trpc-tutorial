@@ -1,68 +1,43 @@
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { CreateUserInput } from '../schema/user.schema'
-import { trpc } from '../utils/trpc'
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { RequestOtpInput } from '../schema/user.schema';
+import { trpc } from '../utils/trpc';
+import VerifyToken from './VerifyToken';
 
-function VerifyToken({ hash }: { hash: string }) {
-  const router = useRouter()
-  const { data, isLoading } = trpc.useQuery([
-    'users.verify-otp',
-    {
-      hash,
-    },
-  ])
+type LoginFormProps = {};
 
-  if (isLoading) {
-    return <p>Verifying...</p>
-  }
+const LoginForm: React.FC<LoginFormProps> = ({}) => {
+  const router = useRouter();
 
-  router.push(data?.redirect.includes('login') ? '/' : data?.redirect || '/')
-
-  return <p>Redirecting...</p>
-}
-
-function LoginForm() {
-  const { handleSubmit, register } = useForm<CreateUserInput>()
-  const [success, setSuccess] = useState(false)
-  const router = useRouter()
-
-  const { mutate, error } = trpc.useMutation(['users.request-otp'], {
-    onSuccess: () => {
-      setSuccess(true)
-    },
-  })
-
-  function onSubmit(values: CreateUserInput) {
-    mutate({ ...values, redirect: router.asPath })
-  }
-
-  const hash = router.asPath.split('#token=')[1]
-
+  const { handleSubmit, register } = useForm<RequestOtpInput>();
+  const { mutate, error, isSuccess } = trpc.useMutation(['users.request-otp']);
+  const onSubmit = (value: RequestOtpInput) => {
+    mutate(value);
+  };
+  const hash = router.asPath.split('#token=')[1];
   if (hash) {
-    return <VerifyToken hash={hash} />
+    return <VerifyToken hash={hash} />;
   }
-
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         {error && error.message}
-
-        {success && <p>Check your email</p>}
+        {isSuccess && <p>Check your mail</p>}
         <h1>Login</h1>
 
         <input
-          type="email"
-          placeholder="jane.doe@example.com"
+          type='email'
+          placeholder='gon.fricks@hxh.com'
           {...register('email')}
         />
-        <button>Login</button>
+        <br />
+
+        <button type='submit'>Submit</button>
       </form>
-
-      <Link href="/register">Register</Link>
+      <Link href='/register'>Register</Link>
     </>
-  )
-}
-
-export default LoginForm
+  );
+};
+export default LoginForm;
